@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi import FastAPI, UploadFile, File
-from openai import BaseModel
+from pydantic import BaseModel
 
 from core.loader import load_document
 from core.splitter import split_documents
@@ -9,9 +8,10 @@ from core.vectorstore import create_vectorstore
 from core.retriever import get_retriever
 from core.qa_chain import build_qa_chain
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
-# ✅ ADD CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ GLOBAL VARIABLES (EMPTY INIT ONLY)
 vectorstore = None
 retriever = None
 qa_chain = None
@@ -30,7 +29,6 @@ class QueryRequest(BaseModel):
     question: str
 
 
-# ✅ UPLOAD ENDPOINT
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     global vectorstore, retriever, qa_chain
@@ -49,7 +47,6 @@ async def upload_file(file: UploadFile = File(...)):
     return {"message": "Document processed successfully"}
 
 
-# ✅ QUERY ENDPOINT
 @app.post("/query")
 async def query_rag(req: QueryRequest):
     global qa_chain, retriever
