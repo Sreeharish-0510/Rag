@@ -10,6 +10,9 @@ from core.retriever import get_retriever
 from core.qa_chain import build_qa_chain
 from fastapi.middleware.cors import CORSMiddleware
 
+
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # allow Streamlit
@@ -17,8 +20,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app = FastAPI()
-
 vectorstore = None
 retriever = None
 qa_chain = None
