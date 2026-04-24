@@ -1,4 +1,3 @@
-import app
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 import os, tempfile
