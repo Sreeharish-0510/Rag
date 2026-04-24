@@ -1,18 +1,15 @@
-import os
 import tempfile
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 
 def load_document(filename, content):
-    _, ext = os.path.splitext(filename)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=filename) as tmp:
+        tmp.write(content)
+        tmp.flush()
+        path = tmp.name
 
-    file_path = os.path.join(tempfile.gettempdir(), "temp" + ext)
-
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    if ext == ".pdf":
-        loader = PyPDFLoader(file_path)
+    if filename.endswith(".pdf"):
+        loader = PyPDFLoader(path)
     else:
-        loader = Docx2txtLoader(file_path)
+        loader = Docx2txtLoader(path)
 
     return loader.load()
