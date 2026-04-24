@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
+from fastapi import FastAPI, UploadFile, File
+from openai import BaseModel
 
 from core.loader import load_document
 from core.splitter import split_documents
@@ -8,9 +9,6 @@ from core.vectorstore import create_vectorstore
 from core.retriever import get_retriever
 from core.qa_chain import build_qa_chain
 
-from fastapi.middleware.cors import CORSMiddleware
-
-# ✅ CREATE APP FIRST
 app = FastAPI()
 
 # ✅ ADD CORS
