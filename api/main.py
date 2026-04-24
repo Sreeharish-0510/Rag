@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
-import os, tempfile
 
 from core.loader import load_document
 from core.splitter import split_documents
@@ -8,18 +7,22 @@ from core.embeddings import get_embeddings
 from core.vectorstore import create_vectorstore
 from core.retriever import get_retriever
 from core.qa_chain import build_qa_chain
+
 from fastapi.middleware.cors import CORSMiddleware
 
-
+# ✅ CREATE APP FIRST
 app = FastAPI()
 
+# ✅ ADD CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow Streamlit
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ✅ GLOBAL VARIABLES (EMPTY INIT ONLY)
 vectorstore = None
 retriever = None
 qa_chain = None
@@ -29,26 +32,26 @@ class QueryRequest(BaseModel):
     question: str
 
 
+# ✅ UPLOAD ENDPOINT
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     global vectorstore, retriever, qa_chain
 
     content = await file.read()
 
-    if not content:
-        return {"error": "Empty file received"}
-
     docs = load_document(file.filename, content)
-
     chunks = split_documents(docs)
-    embeddings = get_embeddings()
 
+    embeddings = get_embeddings()
     vectorstore = create_vectorstore(chunks, embeddings)
+
     retriever = get_retriever(vectorstore)
     qa_chain = build_qa_chain(retriever)
 
     return {"message": "Document processed successfully"}
 
+
+# ✅ QUERY ENDPOINT
 @app.post("/query")
 async def query_rag(req: QueryRequest):
     global qa_chain, retriever
@@ -59,7 +62,7 @@ async def query_rag(req: QueryRequest):
     docs = retriever.get_relevant_documents(req.question)
 
     if not docs:
-        return {"answer": "I don't know based on the provided document."}
+        return {"answer": "I don't know based on the document."}
 
     answer = qa_chain.run(req.question)
 
@@ -68,4 +71,4 @@ async def query_rag(req: QueryRequest):
 
 @app.get("/")
 def root():
-    return {"status": "RAG API running"}
+    return {"status": "running"}
