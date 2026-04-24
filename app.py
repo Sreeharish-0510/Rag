@@ -1,7 +1,9 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8000"
+import os
+
+API_URL = f"http://localhost:{os.environ.get('PORT', 10000)}"
 
 st.title("🔐 Secure RAG Chatbot")
 
