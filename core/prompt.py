@@ -15,7 +15,6 @@ Rules:
 Instructions:
 - Keep answers short and precise.
 - If the answer is a name, return just the name.
-- If the answer is a list, return clearly formatted points.
 
 Context:
 {context}

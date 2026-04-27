@@ -42,7 +42,7 @@ async def upload_file(file: UploadFile = File(...)):
     vectorstore = create_vectorstore(chunks, embeddings)
 
     retriever = get_retriever(vectorstore)
-    qa_chain = build_qa_chain(retriever)
+    qa_chain = build_qa_chain()   
 
     return {"message": "Document processed successfully"}
 
@@ -54,15 +54,32 @@ async def query_rag(req: QueryRequest):
     if not qa_chain:
         return {"answer": "Upload document first"}
 
-    docs = retriever.get_relevant_documents(req.question)
+    # 🔹 Step 1: Improve query (important for short questions)
+    question = req.question
+    if len(question.split()) <= 4:
+        question = f"Explain clearly: {question}"
+
+    # 🔹 Step 2: Retrieve docs
+    docs = retriever.get_relevant_documents(question)
 
     if not docs:
         return {"answer": "I don't know based on the document."}
 
-    answer = qa_chain.run(req.question)
+    # 🔹 DEBUG (remove later)
+    print("\n--- RETRIEVED DOCS ---")
+    for i, d in enumerate(docs):
+        print(f"\nDOC {i}:\n{d.page_content[:300]}")
+
+    # 🔹 Step 3: Combine context manually
+    context = "\n\n".join([d.page_content for d in docs])
+
+    # 🔹 Step 4: Ask LLM with SAME context
+    answer = qa_chain.run({
+        "query": question,
+        "context": context
+    })
 
     return {"answer": answer}
-
 
 @app.get("/")
 def root():
